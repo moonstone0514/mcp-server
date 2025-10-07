@@ -41,6 +41,8 @@ public class ChecklistService {
                 .orElseThrow(() -> new IllegalArgumentException("No ISMS Checklist with id=" + id));
 
         JsonNode json = mapper.valueToTree(entity);
-        return ollamaService.analyze(json);
+        // ChecklistService.java
+        String prompt = json.toString();  // JsonNode → String
+        return ollamaService.analyzeChecklist(prompt);
     }
 }
