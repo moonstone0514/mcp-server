@@ -8,8 +8,12 @@ public class IsmsChecklist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name="system_name")   // ✅ 예약어 회피
     private String system;
+
+    @Column(name="event_time")    // ✅ 예약어 회피
     private String timestamp;
+
     private Integer userCount;
     private String lastPasswordChange;
     private Integer logRetentionDays;
