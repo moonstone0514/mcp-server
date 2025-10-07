@@ -1,7 +1,9 @@
 package org.example.mcpserver.controller;
 
 import org.example.mcpserver.entity.Checklist;
+import org.example.mcpserver.dto.IsmsChecklistPayload;
 import org.example.mcpserver.service.ChecklistService;
+import org.springframework.http.ResponseEntity; // ✅ 추가
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,5 +33,4 @@ public class ChecklistController {
         // TODO: Service에 넘기거나 DB 저장 로직 추가
         return ResponseEntity.ok("Received ISMS Checklist for system: " + payload.getSystem());
     }
-
 }
