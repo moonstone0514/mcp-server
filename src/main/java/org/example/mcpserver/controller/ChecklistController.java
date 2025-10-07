@@ -3,12 +3,14 @@ package org.example.mcpserver.controller;
 import org.example.mcpserver.entity.Checklist;
 import org.example.mcpserver.entity.IsmsChecklist;
 import org.example.mcpserver.dto.IsmsChecklistPayload;
+import org.example.mcpserver.dto.AnalysisResponse;
 import org.example.mcpserver.service.ChecklistService;
 import org.example.mcpserver.repository.IsmsChecklistRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/checklists")
@@ -23,13 +25,13 @@ public class ChecklistController {
         this.ismsChecklistRepository = ismsChecklistRepository;
     }
 
-    // ✅ 기존 Checklist 전체 조회
+    // ✅ Checklist 전체 조회
     @GetMapping
     public List<Checklist> getAll() {
         return checklistService.getAll();
     }
 
-    // ✅ 기존 Checklist 생성
+    // ✅ Checklist 생성
     @PostMapping
     public Checklist create(@RequestBody Checklist checklist) {
         return checklistService.save(checklist);
@@ -57,5 +59,16 @@ public class ChecklistController {
     @GetMapping("/isms")
     public List<IsmsChecklist> getAllIsmsChecklists() {
         return ismsChecklistRepository.findAll();
+    }
+
+    // ✅ ISMS 체크리스트 분석 (Ollama 연동)
+    @GetMapping("/isms/analyze/{id}")
+    public ResponseEntity<?> analyzeIsmsChecklist(@PathVariable Long id) {
+        try {
+            String result = checklistService.analyzeIsmsChecklist(id);
+            return ResponseEntity.ok(new AnalysisResponse(id, result));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
     }
 }

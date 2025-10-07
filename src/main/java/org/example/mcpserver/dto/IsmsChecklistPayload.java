@@ -12,7 +12,7 @@ public class IsmsChecklistPayload {
 
     public IsmsChecklistPayload() {}
 
-    // getter / setter 전부 생성
+    // Getter / Setter
     public String getSystem() { return system; }
     public void setSystem(String system) { this.system = system; }
 
@@ -37,4 +37,3 @@ public class IsmsChecklistPayload {
     public Boolean getMfaEnabled() { return mfaEnabled; }
     public void setMfaEnabled(Boolean mfaEnabled) { this.mfaEnabled = mfaEnabled; }
 }
-

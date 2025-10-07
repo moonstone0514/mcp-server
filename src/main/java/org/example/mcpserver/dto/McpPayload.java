@@ -4,7 +4,6 @@ public class McpPayload {
     private String message;
 
     public McpPayload() {}
-
     public McpPayload(String message) {
         this.message = message;
     }
