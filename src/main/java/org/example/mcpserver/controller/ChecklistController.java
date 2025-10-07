@@ -25,19 +25,19 @@ public class ChecklistController {
         this.ismsChecklistRepository = ismsChecklistRepository;
     }
 
-    // ✅ Checklist 전체 조회
+    // Checklist 전체 조회
     @GetMapping
     public List<Checklist> getAll() {
         return checklistService.getAll();
     }
 
-    // ✅ Checklist 생성
+    // Checklist 생성
     @PostMapping
     public Checklist create(@RequestBody Checklist checklist) {
         return checklistService.save(checklist);
     }
 
-    // ✅ ISMS 체크리스트 저장
+    // ISMS 체크리스트 저장
     @PostMapping("/isms")
     public ResponseEntity<String> receiveIsmsChecklist(@RequestBody IsmsChecklistPayload payload) {
         IsmsChecklist entity = new IsmsChecklist();
@@ -55,19 +55,20 @@ public class ChecklistController {
         return ResponseEntity.ok("✅ Saved ISMS Checklist for system: " + payload.getSystem());
     }
 
-    // ✅ ISMS 체크리스트 전체 조회
+    // ISMS 체크리스트 전체 조회 (UI가 데이터 로드할 때 사용)
     @GetMapping("/isms")
     public List<IsmsChecklist> getAllIsmsChecklists() {
         return ismsChecklistRepository.findAll();
     }
 
-    // ✅ ISMS 체크리스트 분석 (Ollama 연동)
+    // ISMS 체크리스트 분석 (Ollama 연동)
     @GetMapping("/isms/analyze/{id}")
     public ResponseEntity<?> analyzeIsmsChecklist(@PathVariable Long id) {
         try {
             String result = checklistService.analyzeIsmsChecklist(id);
             return ResponseEntity.ok(new AnalysisResponse(id, result));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }

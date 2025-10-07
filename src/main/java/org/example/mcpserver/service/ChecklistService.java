@@ -26,7 +26,7 @@ public class ChecklistService {
         this.ollamaService = ollamaService;
     }
 
-    // Checklist
+    // Checklist (기존)
     public List<Checklist> getAll() {
         return checklistRepository.findAll();
     }

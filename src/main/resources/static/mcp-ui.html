@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>MCP ISMS Analyzer</title>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 16px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f4f4f4; }
+        button { padding: 6px 10px; cursor: pointer; }
+        #result { white-space: pre-wrap; background:#fafafa; padding:12px; border:1px solid #eee; min-height:120px; }
+        .loading { color: #888; font-style: italic; }
+    </style>
+</head>
+<body>
+<h2>MCP ISMS Checklist</h2>
+
+<div>
+    <button id="refreshBtn">Refresh list</button>
+</div>
+
+<table id="listTable" aria-live="polite">
+    <thead>
+    <tr><th>ID</th><th>System</th><th>Timestamp</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="listBody">
+    <tr><td colspan="4">Loading...</td></tr>
+    </tbody>
+</table>
+
+<h3>Analysis</h3>
+<div id="result" class="">Select an ID to analyze.</div>
+
+<script>
+    const listBody = document.getElementById('listBody');
+    const resultEl = document.getElementById('result');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    async function loadList() {
+        listBody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+        try {
+            const res = await fetch('/checklists/isms');
+            const items = await res.json();
+            if (!Array.isArray(items) || items.length === 0) {
+                listBody.innerHTML = '<tr><td colspan="4">No data</td></tr>';
+                return;
+            }
+            listBody.innerHTML = items.map(it => {
+                return `<tr>
+        <td>${it.id}</td>
+        <td>${it.system || '-'}</td>
+        <td>${it.timestamp || '-'}</td>
+        <td><button onclick="analyze(${it.id}, this)">Analyze</button></td>
+      </tr>`;
+            }).join('');
+        } catch (err) {
+            listBody.innerHTML = '<tr><td colspan="4">Error loading list</td></tr>';
+            console.error(err);
+        }
+    }
+
+    async function analyze(id, btn) {
+        // UI 상태
+        resultEl.textContent = "Analyzing (this may take some time)...";
+        resultEl.classList.add('loading');
+        btn.disabled = true;
+
+        try {
+            // Fetch with abort timeout ~110s to match server read timeout
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 110000);
+
+            const resp = await fetch('/checklists/isms/analyze/' + encodeURIComponent(id), {
+                method: 'GET',
+                signal: controller.signal
+            });
+            clearTimeout(timeout);
+
+            if (!resp.ok) {
+                const err = await resp.json().catch(()=>({error: 'Unknown error'}));
+                resultEl.textContent = 'Error: ' + (err.error || JSON.stringify(err));
+                resultEl.classList.remove('loading');
+                btn.disabled = false;
+                return;
+            }
+
+            const json = await resp.json();
+            // json.analysis contains text from Ollama
+            resultEl.textContent = json.analysis || JSON.stringify(json, null, 2);
+            resultEl.classList.remove('loading');
+        } catch (e) {
+            if (e.name === 'AbortError') {
+                resultEl.textContent = 'Request timed out after 110s.';
+            } else {
+                resultEl.textContent = 'Network error: ' + e.message;
+            }
+            resultEl.classList.remove('loading');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    refreshBtn.addEventListener('click', loadList);
+    window.addEventListener('load', loadList);
+</script>
+</body>
+</html>
