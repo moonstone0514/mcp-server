@@ -25,4 +25,11 @@ public class ChecklistController {
     public Checklist create(@RequestBody Checklist checklist) {
         return checklistService.save(checklist);
     }
+
+    @PostMapping("/isms")
+    public ResponseEntity<String> receiveIsmsChecklist(@RequestBody IsmsChecklistPayload payload) {
+        // TODO: Service에 넘기거나 DB 저장 로직 추가
+        return ResponseEntity.ok("Received ISMS Checklist for system: " + payload.getSystem());
+    }
+
 }
